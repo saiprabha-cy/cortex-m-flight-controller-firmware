@@ -1,0 +1,7 @@
+build/
+build-host/
+keys/dev_private.key
+__pycache__/
+*.pyc
+.pytest_cache/
+*.dump

@@ -1,0 +1,6 @@
+{"summary": "MisraTypedefInfo", "data": [{"name": "fault_type_t", "file": "common/fault_types.h", "line": 5, "column": 1, "used": false}]}
+{"summary": "MisraTagName", "data": [{"name": "fault_type_t", "used": false, "file": "common/fault_types.h", "line": 5, "column": 14}]}
+{"summary": "MisraMacro", "data": [{"name": "FAULT_TYPES_H", "used": true, "file": "common/fault_types.h", "line": 3, "column": 0}]}
+{"summary": "MisraExternalIdentifiers", "data": [{"name": "fault_policy_trailing_abnormal", "file": "common/fault_policy.c", "line": 10, "column": 10, "decl": false}]}
+{"summary": "MisraInternalIdentifiers", "data": [{"name": "is_abnormal", "file": "common/fault_policy.c", "line": 3, "column": 12, "inlinefunc": false}, {"name": "is_boundary", "file": "common/fault_policy.c", "line": 8, "column": 12, "inlinefunc": false}]}
+{"summary": "MisraLocalIdentifiers", "data": [{"name": "n", "file": "common/fault_policy.c", "line": 10, "column": 72}, {"name": "t", "file": "common/fault_policy.c", "line": 14, "column": 17}, {"name": "types", "file": "common/fault_policy.c", "line": 10, "column": 56}, {"name": "i", "file": "common/fault_policy.c", "line": 13, "column": 19}, {"name": "count", "file": "common/fault_policy.c", "line": 12, "column": 14}]}

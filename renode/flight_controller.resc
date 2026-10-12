@@ -1,0 +1,26 @@
+# flight_controller.resc - single-machine bring-up: bootloader + slot A application.
+# Run from the repository root:   renode renode/flight_controller.resc
+#   (headless / CI:)              renode --disable-xwt --console renode/flight_controller.resc
+# Variables can be overridden before 'include', e.g.  $slotA=@build/app_v2_a.signed.bin
+# Slot B is left erased unless you load an image yourself:  sysbus LoadBinary @build/app_b.signed.bin 0x08080000
+using sysbus
+mach create "fc"
+machine LoadPlatformDescription @renode/stm32f407.repl
+
+$bootloader?=@build/bootloader.elf
+$slotA?=@build/app_a.signed.bin
+$linkport?=4001
+$uart1log?=@build/uart1_debug.log
+
+# USART1 = debug console, USART2 = framed command/telemetry link (TCP server for the Python tools)
+emulation CreateServerSocketTerminal $linkport "linkterm" false
+connector Connect sysbus.usart2 linkterm
+
+macro reset
+"""
+    sysbus LoadELF $bootloader
+    sysbus LoadBinary $slotA 0x08020000
+    sysbus.cpu VectorTableOffset 0x08000000
+"""
+runMacro $reset
+sysbus.usart1 CreateFileBackend $uart1log true

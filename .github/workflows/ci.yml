@@ -1,0 +1,39 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build-and-unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi cmake ninja-build cppcheck clang-tidy
+          python3 -m pip install --break-system-packages pytest cryptography
+      - name: Firmware build (warnings are errors)
+        run: ./scripts/build.sh
+      - name: Host unit tests (ASan + UBSan)
+        run: ./scripts/run_unit_tests.sh
+      - name: Packager <-> bootloader verifier interop
+        run: python3 -m pytest tests/integration/test_packager_interop.py -v
+      - name: Static analysis
+        run: ./scripts/run_static.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: firmware, path: "build/*.signed.bin\nbuild/*.elf\nbuild/static/" }
+  hil-renode:
+    runs-on: ubuntu-24.04
+    needs: build-and-unit
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain + Renode
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi cmake ninja-build
+          python3 -m pip install --break-system-packages pytest cryptography
+          mkdir -p $HOME/renode && curl -L https://github.com/renode/renode/releases/download/v1.17.0/renode-1.17.0.linux-portable.tar.gz | tar xz -C $HOME/renode --strip-components=1
+      - run: ./scripts/build.sh
+      - name: HIL (fast subset)
+        env: { RENODE: "${{ github.workspace }}/../../../renode/renode" }
+        run: |
+          export RENODE=$HOME/renode/renode
+          python3 -m pytest tests/integration -v -m "not slow" -k "not estimation"

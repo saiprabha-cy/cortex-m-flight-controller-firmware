@@ -1,0 +1,30 @@
+# two_nodes.resc - OBC (flight controller) + power node on one CAN bus (two emulated machines).
+# Run from the repo root:  renode renode/two_nodes.resc
+# USART2 of the OBC is on tcp://localhost:4001; debug consoles are written to build/uart1_obc.log and build/uart1_node.log.
+# To make the power node go silent (node-lost demo) send a CAN command - or simply pause that machine:  mach set "node"  ;  pause
+$bootloader?=@build/bootloader.elf
+$slotA?=@build/app_a.signed.bin
+$node?=@build/power_node.elf
+$linkport?=4001
+$obclog?=@build/uart1_obc.log
+$nodelog?=@build/uart1_node.log
+
+emulation CreateCANHub "canhub"
+emulation CreateServerSocketTerminal $linkport "linkterm" false
+
+mach create "obc"
+machine LoadPlatformDescription @renode/stm32f407.repl
+connector Connect sysbus.usart2 linkterm
+sysbus.usart1 CreateFileBackend $obclog true
+connector Connect sysbus.can1 canhub
+sysbus LoadELF $bootloader
+sysbus LoadBinary $slotA 0x08020000
+sysbus.cpu VectorTableOffset 0x08000000
+
+mach create "node"
+machine LoadPlatformDescription @renode/stm32f407.repl
+sysbus.usart1 CreateFileBackend $nodelog true
+connector Connect sysbus.can1 canhub
+sysbus LoadELF $node
+
+emulation SetGlobalSerialExecution true

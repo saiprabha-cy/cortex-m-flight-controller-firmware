@@ -1,0 +1,8 @@
+ENTRY(Reset_Handler)
+_Min_Stack_Size = 0x1000;
+MEMORY
+{
+    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K
+    RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 128K - 32
+}
+INCLUDE sections.ld
